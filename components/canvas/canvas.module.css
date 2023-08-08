@@ -1,0 +1,16 @@
+.canvas {
+  display: grid;
+  grid-template-columns: auto 1fr auto;
+}
+
+.inspector {
+  width: 20vw;
+  padding: 10px;
+  border: 1px solid #ccc;
+}
+
+.navigator {
+  width: 20vw;
+  padding: 10px;
+  border: 1px solid #ccc;
+}
