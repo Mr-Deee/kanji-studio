@@ -1,4 +1,4 @@
-import { CSSProperties, useState } from "react";
+import { CSSProperties, useRef, useState } from "react";
 import styles from "./canvas.module.css";
 import { nanoid } from "nanoid/non-secure";
 // dynamic import
@@ -14,6 +14,8 @@ import dynamic from "next/dynamic";
 export function Canvas() {
   const [canvasElements, setCanvasElements] = useState<any[]>([]);
   const [selectedElement, setSelectedElement] = useState<number | null>(null);
+  const [draggingElement, setDraggingElement] = useState<number | null>(null);
+  const canvasRef = useRef<HTMLDivElement>(null);
 
   function handleCanvasClick(e: any) {
     if (e.target !== e.currentTarget) {
@@ -30,6 +32,7 @@ export function Canvas() {
       type: type,
       content: type === "text" ? "Text" : null,
       styles: {
+        position: "relative",
         padding: 10,
         border: "1px solid black",
       },
@@ -57,10 +60,40 @@ export function Canvas() {
     setSelectedElement(elementId);
   }
 
+  function handleDragStart(elementId: number) {
+    setDraggingElement(elementId);
+  }
+
+  function handleDrag(event: any) {
+    if (draggingElement !== null) {
+      const position = canvasRef.current?.getBoundingClientRect();
+      const xPos = event.clientX - position?.left! - 50;
+      const yPos = event.clientY - position?.top! - 50;
+      // Update the position of the dragged element based on mouse coordinates
+      const updatedElements = canvasElements.map((element) =>
+        element.id === draggingElement
+          ? {
+              ...element,
+              styles: {
+                ...element.styles,
+                left: `${xPos}px`,
+                top: `${yPos}px`,
+              },
+            }
+          : element
+      );
+      setCanvasElements(updatedElements);
+    }
+  }
+
+  const handleDragEnd = () => {
+    setDraggingElement(null);
+  };
+
   function renderElementContent(element: any) {
     switch (element.type) {
       case "text":
-        return <p style={element.styles}>{element.content} text here</p>;
+        return <p>{element.content} text here</p>;
       case "image":
         return <img src={element.src} alt={element.alt} />;
       default:
@@ -69,21 +102,31 @@ export function Canvas() {
   }
 
   return (
-    <div className={styles.canvas} onClick={handleCanvasClick}>
+    <div
+      className={styles.canvas}
+      //   onClick={handleCanvasClick}
+      onMouseMove={handleDrag}
+      onMouseUp={handleDragEnd}
+    >
       <Navigator
         elements={canvasElements}
         selectedElement={selectedElement}
         setSelectedElement={(id) => setSelectedElement(id)}
       />
       <div
+        ref={canvasRef}
         className="canvas__elements"
         style={{ padding: 20, border: "1px solid black" }}
       >
         {canvasElements.map((element) => (
           <div
             key={element.id}
-            className="canvas__element"
+            className={`canvas-element ${
+              selectedElement === element.id ? "selected" : ""
+            }`}
             onClick={() => handleElementClick(element.id)}
+            draggable
+            onDragStart={() => handleDragStart(element.id)}
             style={{
               ...element.styles,
               border:
@@ -93,6 +136,9 @@ export function Canvas() {
             }}
           >
             {renderElementContent(element)}
+            <button onClick={() => handleDragStart(element.id)}>
+              drag toggle
+            </button>
           </div>
         ))}
         <h4>{JSON.stringify(canvasElements)}</h4>
