@@ -13,3 +13,5 @@ This project is intended to be a Webflow clone. The idea here is that you would 
 - Should be able to edit properties of elements
 - Should be able to reorder elements
 - Should be able to nest & unnest elements
+- Elements should be accessible via readable format. eg. JSON.
+- DOM Tree should be able to be created from element list
