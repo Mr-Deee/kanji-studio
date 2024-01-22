@@ -23,7 +23,7 @@ import Navbar from '../components/navbar';
 const App: React.FC = () => {
   return (
     <div>
-      <Navbar />
+      <Navbar brandName={''} imageSrcPath={''} navItems={[]} />
       {/* Other content of your home page */}
     </div>
   );
